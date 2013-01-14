@@ -1,0 +1,36 @@
+usage() {
+	echo "usage: git mhf clone -d <dir>"
+}
+
+init() {
+	echo "junk" >/dev/null
+}
+
+DEFINE_string 'dir' 'mysupadefault' 'Name of directory to clone to' 'd'
+
+parse_args() {
+	# parse options
+	FLAGS "$@" || exit $?
+	eval set -- "${FLAGS_ARGV}"
+	CLONE_DIR=${FLAGS_dir}
+}
+
+# Default entry when no SUBACTION is given
+cmd_default() {
+	parse_args "$@"
+	echo "** cloning MetraTechSuper from github to $CLONE_DIR"
+	git clone --recursive https://github.com/MetraTech/MetraTechSuper.git $CLONE_DIR
+	cd $CLONE_DIR
+	echo "** check out develop before doing init"
+	git checkout develop
+	git submodule foreach 'git checkout develop;'
+	git commit -a -m 'snap develop'
+	echo "** init git mhf"
+	git mhf init; 
+	echo "** DONE"
+}
+
+cmd_help() {
+	usage
+	exit 0
+}

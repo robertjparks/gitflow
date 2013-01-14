@@ -54,9 +54,10 @@ fi
 export HUBFLOW_DIR=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
 
 usage() {
-	echo "usage: git hf <subcommand>"
+	echo "usage: git mhf <subcommand>"
 	echo
 	echo "Available subcommands are:"
+	echo "   clone     Recursive clone and init of MetraTechSuper repo"
 	echo "   init      Initialize a new git repo with support for the branching model."
 	echo "   feature   Manage your feature branches."
 	echo "   release   Manage your release branches."
@@ -65,7 +66,7 @@ usage() {
 	echo "   update    Pull upstream changes down into your master and develop branches."
 	echo "   version   Shows version information."
 	echo
-	echo "Try 'git hf <subcommand> help' for details."
+	echo "Try 'git mhf <subcommand> help' for details."
 }
 
 main() {
@@ -91,13 +92,19 @@ main() {
 	# sanity checks
 	SUBCOMMAND="$1"; shift
 
-	if [ ! -e "$HUBFLOW_DIR/git-hf-$SUBCOMMAND" ]; then
+
+	# First try git-mhf if exists, else fall back on git-hf
+	export SUBCOMMAND_PATH="$HUBFLOW_DIR/git-mhf-$SUBCOMMAND"
+	if [ ! -e $SUBCOMMAND_PATH ]; then
+		SUBCOMMAND_PATH="$HUBFLOW_DIR/git-hf-$SUBCOMMAND"
+	fi
+	if [ ! -e $SUBCOMMAND_PATH ]; then
 		usage
 		exit 1
 	fi
 
 	# run command
-	. "$HUBFLOW_DIR/git-hf-$SUBCOMMAND"
+	. $SUBCOMMAND_PATH
 	FLAGS_PARENT="git hf $SUBCOMMAND"
 
 	# test if the first argument is a flag (i.e. starts with '-')
